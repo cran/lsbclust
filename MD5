@@ -1,4 +1,4 @@
-c5db0a8cfbd24154804eb8c7eb1ea214 *DESCRIPTION
+42a16d45fd6e580364af7993216f527c *DESCRIPTION
 93d492f61af5ef972984fad14f54d796 *NAMESPACE
 4b0850654737c9f255873fd3757d076d *R/RcppExports.R
 f5b46f276e144eae97ca5b8d7de41bcf *R/bicomp.R
@@ -13,7 +13,7 @@ b41eaa7f3e5626399d1c16a230b4aab4 *R/lsbclust-package.R
 f9b05b1159dc430c55dad998818f05e8 *R/orc.lsbclust.R
 36f32c37cc8d03d3107deb283187efd8 *R/plot.bicomp.R
 cbc70c8049f989ff79dd2ba741c7b341 *R/plot.col.kmeans.R
-8dcbadfd24c5079da03f44bf4b313c72 *R/plot.int.lsbclust.R
+726c43fb749859194c6c334773fbd2da *R/plot.int.lsbclust.R
 c5a0a4620abfe65e374f85607d6cb00a *R/plot.lsbclust.R
 ad7fd06512c9696f3c7aa4f574a4fa8c *R/plot.ovl.kmeans.R
 703754d74682cd7cb4a3d1c22a95c5c8 *R/plot.row.kmeans.R
@@ -23,7 +23,7 @@ e0ff760621397e9bf92e1bccff102511 *R/sim.lsbclust.R
 3e6174eb26adf58838d7c89106988851 *R/step.lsbclust.R
 2aab00d8e2a65ab13eb1360cd5d61ebb *R/summary.int.lsbclust.R
 118c1541f783c26906be77addefddf7b *R/summary.lsbclust.R
-4cb0aa389b18d10719279e0577fb35e8 *R/supermarkets.R
+74b2f5b2aa16971909e248f640171b14 *R/supermarkets.R
 8391f2a88b58c672b172ad9d43f8377c *data/dcars.rda
 f93aa155129e635e79247177f8aea592 *data/lov.rda
 e473cffbe81afe97550dfb3c4cd9edde *data/supermarkets.rda
@@ -52,7 +52,7 @@ c625ebc46136c4e2786544ab4608b2b5 *man/plot.int.lsbclust.Rd
 069b8c3d2872f7dd725e2f7569489812 *man/step.lsbclust.Rd
 c7d52b66db8c2b0ad6ac30c49c9eaa67 *man/summary.int.lsbclust.Rd
 39f2187d0ab2f17c23b5fb5e7122c3e4 *man/summary.lsbclust.Rd
-d901e2ee7c160258fb8e88a4b710fda3 *man/supermarkets.Rd
+2e2b2ca03634b5ac1fe68d172662bf34 *man/supermarkets.Rd
 d03c70f94081ffa587fbc8021f9febd7 *src/ClustMeans.cpp
 dabec28177ad3563e30bceac29bd2994 *src/LossMat.cpp
 69198b097499d24b8350cebbc36feebe *src/RcppExports.cpp
@@ -63,5 +63,5 @@ ba0bdd1ebc85dafcfc33831ef01279cc *tests/testthat/intcols.rda
 b2a272464492625da3eefff31f9d34df *tests/testthat/introws.rda
 70b6a54690b66d51bea65d86d108710f *tests/testthat/ovl.rda
 0d094911b0c7bc99b5e57bbe4d53979f *tests/testthat/rows.rda
-ea9a4079986933432a73abc3c7305499 *tests/testthat/test_interactions.R
-15419562ada1852b147ac49699eb0c54 *tests/testthat/test_orc.R
+4b5661c2c724589982ee461e6bff3fa3 *tests/testthat/test_interactions.R
+49aaed7432f44ace1d0c70e7b5cc4b3f *tests/testthat/test_orc.R

@@ -131,7 +131,7 @@ plot.int.lsbclust <- function(x, which = seq_len(nclust), plot.type = c("biplots
   plot.type <- match.arg(arg = plot.type, several.ok = FALSE)
   
   ## Set up list containing plot grobs
-  plots <- vector(length = length(which), mode = "list")
+  plots <- vector(length = max(nC, nD), mode = "list")
   
   ## Do the biplots if required
   if ("biplots" %in% plot.type) {
@@ -703,6 +703,9 @@ plot.int.lsbclust <- function(x, which = seq_len(nclust), plot.type = c("biplots
         theme_bw() + theme(...)
     }
   }
+  
+  ## Set plot names
+  names(plots) <- paste0("plot", seq_len(nclust))
   
   ## Return plots
   if (arrange) do.call(gridExtra::grid.arrange, plots[which])

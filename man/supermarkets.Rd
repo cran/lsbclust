@@ -18,6 +18,6 @@ to 8 variables. A rating scale from 1 to 10 was used.
 }
 \examples{
 data("supermarkets")
-fit <- lsbclust(data = supermarkets, nclust = 6, fixed = "rows")
+fit <- lsbclust(data = supermarkets, nclust = 6, fixed = "rows", nstart = 2)
 }
 

@@ -1,5 +1,8 @@
 library("lsbclust")
 
+## Check whether extended-precision long doubles are available
+donttest <- .Machine$sizeof.longdouble == 0
+
 ## Check overall means, row and column means for consistency
 
 context("Overall means")
@@ -21,8 +24,14 @@ ovltest <- orc.lsbclust(data = supermarkets, margin = 3, delta = c(1, 0, 1, 0),
                     nclust = 12, nstart = 500, type = "overall")
 
 ## Check different aspects of results
-test_that("cluster vector", expect_identical(ovl$cluster, ovltest$cluster))
-test_that("cluster means", expect_equal(ovl$centers, ovltest$centers))
+test_that("cluster vector", {
+  if (donttest) skip(".Machine$sizeof.longdouble is 0.")
+  expect_identical(ovl$cluster, ovltest$cluster)
+  })
+test_that("cluster means", {
+  if (donttest) skip(".Machine$sizeof.longdouble is 0.")
+  expect_equal(ovl$centers, ovltest$centers)
+  })
 
 ## Remove objects
 rm(ovl, ovltest)
@@ -46,8 +55,14 @@ rowstest <- orc.lsbclust(data = supermarkets, margin = 3, delta = c(0, 1, 0, 0),
                         nclust = 9, nstart = 500, type = "rows")
 
 ## Check different aspects of results
-test_that("cluster vector", expect_identical(rows$cluster, rowstest$cluster))
-test_that("cluster means", expect_equal(rows$centers, rowstest$centers))
+test_that("cluster vector", {
+  if (donttest) skip(".Machine$sizeof.longdouble is 0.")
+  expect_identical(rows$cluster, rowstest$cluster)
+  })
+test_that("cluster means", {
+  if (donttest) skip(".Machine$sizeof.longdouble is 0.")
+  expect_equal(rows$centers, rowstest$centers)
+  })
 
 ## Remove objects
 rm(rows, rowstest)
@@ -71,8 +86,14 @@ colstest <- orc.lsbclust(data = supermarkets, margin = 3, delta = c(1, 0, 1, 0),
                          nclust = 7, nstart = 500, type = "columns")
 
 ## Check different aspects of results
-test_that("cluster vector", expect_identical(cols$cluster, colstest$cluster))
-test_that("cluster means", expect_equal(cols$centers, colstest$centers))
+test_that("cluster vector", {
+  if (donttest) skip(".Machine$sizeof.longdouble is 0.")
+  expect_identical(cols$cluster, colstest$cluster)
+  })
+test_that("cluster means", {
+  if (donttest) skip(".Machine$sizeof.longdouble is 0.")
+  expect_equal(cols$centers, colstest$centers)
+  })
 
 ## Remove objects
 rm(cols, colstest)

@@ -9,5 +9,5 @@
 #' @source Michel van de Velden
 #' @examples
 #' data("supermarkets")
-#' fit <- lsbclust(data = supermarkets, nclust = 6, fixed = "rows")
+#' fit <- lsbclust(data = supermarkets, nclust = 6, fixed = "rows", nstart = 2)
 NULL
