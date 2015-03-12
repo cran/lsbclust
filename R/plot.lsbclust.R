@@ -13,6 +13,8 @@
 #' @keywords hplot
 #' @author Pieter C. Schoonees
 #' @method plot lsbclust
+#' @seealso \code{\link{plot.int.lsbclust}}, \code{\link{plot.ovl.kmeans}}, 
+#' \code{\link{plot.row.kmeans}}, \code{\link{plot.col.kmeans}}
 #' @export
 #' @examples
 #' data("dcars")

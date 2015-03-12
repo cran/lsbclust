@@ -38,7 +38,9 @@ between rows and columns.}
 
 \item{maxit}{The maximum number of iterations allowed.}
 
-\item{verbose}{The number of iterations after which information on progress is provided.}
+\item{verbose}{Integer controlling the amount of information printed: 0 = no information,
+1 = Information on random starts and progress, and 2 = information is printed after
+each iteration for the interaction clustering.}
 
 \item{method}{The method for calculating cluster agreement across random starts, passed on
 to \code{\link{cl_agreement}}. None is calculated when set to \code{NULL}.}

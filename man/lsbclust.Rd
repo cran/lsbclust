@@ -43,8 +43,9 @@ between rows and columns (passed to \code{\link{int.lsbclust}}).}
 
 \item{maxit}{The maximum number of iterations allowed in the interaction clustering.}
 
-\item{verbose}{The number of iterations after which information on progress is provided
-(passed to \code{\link{int.lsbclust}}).}
+\item{verbose}{Integer controlling the amount of information printed: 0 = no information,
+1 = Information on random starts and progress, and 2 = information is printed after
+each iteration for the interaction clustering.}
 
 \item{method}{The method for calculating cluster agreement across random starts, passed on
 to \code{\link{cl_agreement}} (passed to \code{\link{int.lsbclust}}).}
@@ -62,6 +63,19 @@ have a different number of clusters. If \code{sep.nclust} is \code{FALSE}, the s
 
 \item{\dots}{Additional arguments passed to \code{\link{kmeans}}.}
 }
+\value{
+Returns an object of S3 class \code{lsbclust} which has slots:
+   \item{\code{overall}}{Object of class \code{ovl.kmeans} for the overall means clustering}
+   \item{\code{rows}}{Object of class \code{row.kmeans} for the row means clustering}
+   \item{\code{columns}}{Object of class \code{col.kmeans} for the column means clustering}
+   \item{\code{interactions}}{Object of class \code{int.lsbclust} for the interaction clustering}
+   \item{\code{call}}{The function call used to create the object}
+   \item{\code{delta}}{The value of \code{delta} in the fit}
+   \item{\code{df}}{Breakdown of the degrees-of-freedom across the different subproblems}
+   \item{\code{loss}}{Breakdown of the loss across subproblems}
+   \item{\code{time}}{Time taken in seconds to calculate the solution}
+   \item{\code{cluster}}{Matrix of cluster membership per observation for all cluster types}
+}
 \description{
 This function clusters along one way of a three-way array (as specified by \code{margin}) while
 decomposing along the other two dimensions. Four types of clusterings are allowed based on the
@@ -73,5 +87,8 @@ The nonorthogonal case \code{delta = (1, 1, 0, 0)} returns an error. See the ref
 \references{
 Schoonees, P.C., Groenen, P.J.F., Van de Velden, M. Least-squares Bilinear Clustering
 of Three-way Data. Econometric Institute Report, EI2014-23.
+}
+\seealso{
+\code{\link{int.lsbclust}}, \code{\link{orc.lsbclust}}
 }
 

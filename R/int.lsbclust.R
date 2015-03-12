@@ -21,7 +21,9 @@
 #' between rows and columns.
 #' @param parallelize Logical indicating whether to parallelize over different starts or not.
 #' @param maxit The maximum number of iterations allowed.
-#' @param verbose The number of iterations after which information on progress is provided.
+#' @param verbose Integer controlling the amount of information printed: 0 = no information, 
+#' 1 = Information on random starts and progress, and 2 = information is printed after
+#' each iteration for the interaction clustering.
 #' @param method The method for calculating cluster agreement across random starts, passed on
 #' to \code{\link{cl_agreement}}. None is calculated when set to \code{NULL}.
 #' @return An object of class \code{int.lsb}
@@ -276,7 +278,7 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
       
       ## Calculate standardized loss and print information if relevant
       loss[iter] <- Gupd$loss/maxloss
-      if(verbose > 0) cat(sprintf(paste0("%", nchar(as.character(maxit)), "d"), iter), 
+      if(verbose > 1) cat(sprintf(paste0("%", nchar(as.character(maxit)), "d"), iter), 
                       "| Loss =", sprintf("%5f", loss[iter]), 
                       sprintf(paste0("%", nchar(as.character(N)) + 3, "s"), 
                               paste0("(", nchange[iter], ")")),
@@ -284,8 +286,7 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
       
       ## Break in case no further changes occur or if maxit is reached
       if(iter == maxit || nchange[iter] == 0) {
-        if(verbose > 0) cat("\n")
-        if(verbose == 0) cat("Loss =", sprintf("%6f", loss[iter]), "\n")
+        if(verbose == 1) cat("\nLoss =", sprintf("%6f", loss[iter]))
         break
       }
     }

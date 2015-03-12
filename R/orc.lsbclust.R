@@ -21,14 +21,19 @@
 #' one of these) indicating whether clustering should be done on row margins, column margins or
 #' the overall means of the two-way slices respectively. If more than one opion are supplied, the
 #' algorithm is run for all (unique) options supplied.
-#' @return A list of a subset of the classes \code{row.kmeans}, \code{col.kmeans} and 
-#' \code{ovl.kmeans} inheriting from class \code{kmeans}. In case \code{type} is a vector, a list
-#' is returned containing the results for each of the (unique) elements of \code{type}, with the
-#' same classes as before.
+#' @param verbose Integer controlling the amount of information printed: 0 = no information, 
+#' 1 = Information on random starts and progress, and 2 = information is printed after
+#' each iteration for the interaction clustering.
 #' @param \dots Additional arguments passed to \code{\link{kmeans}}.
+#' @return A list containing a subset of the classes \code{row.kmeans}, \code{col.kmeans} and 
+#' \code{ovl.kmeans} which are specific versions of class \code{kmeans}. In case \code{type} is a vector, a list
+#' is returned containing the results for each of the (unique) elements of \code{type}, with the
+#' same classes as before. See \code{\link{kmeans}} for an overview of the structure of these objects.
+#' @seealso \code{\link{kmeans}}
+#' @aliases ovl.kmeans row.kmeans col.kmeans
 #' @export
 orc.lsbclust <- function(data, margin = 3L, delta, nclust, sep.nclust = TRUE,  
-                         type = NULL, ...){
+                         type = NULL, verbose = 1, ...){
   
   ## Sanity checks and coercion
   delta <- as.numeric(delta)
@@ -53,7 +58,7 @@ orc.lsbclust <- function(data, margin = 3L, delta, nclust, sep.nclust = TRUE,
   ## Recurse if nclust is a vector
   if(length(nclust) > 1 && !sep.nclust) {
     out <- lapply(nclust, orc.lsbclust, data = data, margin = margin, delta = delta,
-                  type = type, ...)
+                  type = type, verbose = verbose, ...)
     class(out) <- "orc.kmeans"
     return(out)
   }
@@ -61,7 +66,7 @@ orc.lsbclust <- function(data, margin = 3L, delta, nclust, sep.nclust = TRUE,
   ## Recurse if more than one 'type' is supplied
   if(length(type) > 1) {
     out <- mapply(orc.lsbclust, type = type, nclust = nclust, 
-                  MoreArgs = list(data = data, margin = margin, delta = delta, ...), 
+                  MoreArgs = list(data = data, margin = margin, delta = delta, verbose = verbose, ...), 
                   SIMPLIFY = FALSE)
     class(out) <- "orc.kmeans"
     return(out)
@@ -87,8 +92,21 @@ orc.lsbclust <- function(data, margin = 3L, delta, nclust, sep.nclust = TRUE,
   if(is.null(dim(tdata))) tdata <- matrix(tdata, ncol = 1)
   else tdata <- t(tdata)
   
+  # Message if verbose
+  if (verbose) {
+    mess <- switch(type, rows = "K-means on row margins...", 
+                   columns = "K-means on column margins...",
+                   overall = "K-means on overall means...")
+    cat(mess)
+  }
+  
   ## Try running k-means and process results
   out <- try(kmeans(tdata, centers = nclust, ...))
+  
+  ## Complete message
+  if (verbose) {
+    cat("\tDONE\n")
+  }
   
   ## Update output unless error was encountered
   if (!inherits(out, "try-error")) {

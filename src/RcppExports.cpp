@@ -9,32 +9,24 @@ using namespace Rcpp;
 NumericMatrix ClustMeans(int nclust, IntegerVector start, NumericMatrix data);
 RcppExport SEXP lsbclust_ClustMeans(SEXP nclustSEXP, SEXP startSEXP, SEXP dataSEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< int >::type nclust(nclustSEXP );
-        Rcpp::traits::input_parameter< IntegerVector >::type start(startSEXP );
-        Rcpp::traits::input_parameter< NumericMatrix >::type data(dataSEXP );
-        NumericMatrix __result = ClustMeans(nclust, start, data);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< int >::type nclust(nclustSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type start(startSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type data(dataSEXP);
+    __result = Rcpp::wrap(ClustMeans(nclust, start, data));
+    return __result;
 END_RCPP
 }
 // LossMat
 NumericMatrix LossMat(NumericMatrix x, NumericMatrix y);
 RcppExport SEXP lsbclust_LossMat(SEXP xSEXP, SEXP ySEXP) {
 BEGIN_RCPP
-    SEXP __sexp_result;
-    {
-        Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP );
-        Rcpp::traits::input_parameter< NumericMatrix >::type y(ySEXP );
-        NumericMatrix __result = LossMat(x, y);
-        PROTECT(__sexp_result = Rcpp::wrap(__result));
-    }
-    UNPROTECT(1);
-    return __sexp_result;
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type y(ySEXP);
+    __result = Rcpp::wrap(LossMat(x, y));
+    return __result;
 END_RCPP
 }

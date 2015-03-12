@@ -31,5 +31,9 @@ plot(m)
 \author{
 Pieter C. Schoonees
 }
+\seealso{
+\code{\link{plot.int.lsbclust}}, \code{\link{plot.ovl.kmeans}},
+\code{\link{plot.row.kmeans}}, \code{\link{plot.col.kmeans}}
+}
 \keyword{hplot}
 

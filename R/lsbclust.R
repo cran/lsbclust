@@ -28,8 +28,9 @@
 #' @param parallelize Logical indicating whether to parallelize over different starts or not 
 #' (passed to \code{\link{int.lsbclust}}).
 #' @param maxit The maximum number of iterations allowed in the interaction clustering.
-#' @param verbose The number of iterations after which information on progress is provided 
-#' (passed to \code{\link{int.lsbclust}}).
+#' @param verbose Integer controlling the amount of information printed: 0 = no information, 
+#' 1 = Information on random starts and progress, and 2 = information is printed after
+#' each iteration for the interaction clustering.
 #' @param method The method for calculating cluster agreement across random starts, passed on
 #' to \code{\link{cl_agreement}} (passed to \code{\link{int.lsbclust}}).
 #' @param sep.nclust Logical indicating how nclust should be used across different \code{type}'s.
@@ -42,13 +43,25 @@
 #' algorithm is run for all (unique) options supplied (passed to \code{\link{orc.lsbclust}}). This
 #' is an optional argument.
 #' @param \dots Additional arguments passed to \code{\link{kmeans}}.
+#' @return Returns an object of S3 class \code{lsbclust} which has slots:
+#'    \item{\code{overall}}{Object of class \code{ovl.kmeans} for the overall means clustering}
+#'    \item{\code{rows}}{Object of class \code{row.kmeans} for the row means clustering}
+#'    \item{\code{columns}}{Object of class \code{col.kmeans} for the column means clustering}
+#'    \item{\code{interactions}}{Object of class \code{int.lsbclust} for the interaction clustering}
+#'    \item{\code{call}}{The function call used to create the object}
+#'    \item{\code{delta}}{The value of \code{delta} in the fit}
+#'    \item{\code{df}}{Breakdown of the degrees-of-freedom across the different subproblems}
+#'    \item{\code{loss}}{Breakdown of the loss across subproblems}
+#'    \item{\code{time}}{Time taken in seconds to calculate the solution}
+#'    \item{\code{cluster}}{Matrix of cluster membership per observation for all cluster types}
+#' @seealso \code{\link{int.lsbclust}}, \code{\link{orc.lsbclust}}
 #' @export
 #' @references Schoonees, P.C., Groenen, P.J.F., Van de Velden, M. Least-squares Bilinear Clustering
 #' of Three-way Data. Econometric Institute Report, EI2014-23.
 lsbclust <- function(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim = 2,
                      fixed = c("none", "rows", "columns"), nstart = 20, starts = NULL, 
-                     nstart.kmeans = 500, alpha = 0.5, parallelize = FALSE, maxit = 100, verbose = 1, method = "diag",
-                     type = NULL, sep.nclust = TRUE, ...) {
+                     nstart.kmeans = 500, alpha = 0.5, parallelize = FALSE, maxit = 100, verbose = 1, 
+                     method = "diag", type = NULL, sep.nclust = TRUE, ...) {
   
   ## Capture call, start time
   time0 <- proc.time()[3]
@@ -68,24 +81,49 @@ lsbclust <- function(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim = 2,
   if (!is(data, "array") || length(dim(data)) != 3) stop("Data must be a three-way array.") 
   if (!all(margin %in% 1:3) || length(margin) != 1) stop("Argument 'margin' must be 1, 2 or 3.")
   
+  ## Check also ... arguments against stats::kmeans()
+  args.dots <- list(...)
+  nms.dots <- names(args.dots)
+  kmeans.args <- names(formals(stats::kmeans))
+  check.dots <- nms.dots %in% kmeans.args
+  if (any(!check.dots)) {
+    stop("Unknown argument(s): ", nms.dots[!check.dots])    
+  }
+  
+  ## Make sure there are dimnames for ways not clustered over
+  dnms <- dimnames(data)
+  if (is.null(dnms)) namenull <- rep(TRUE, 3L)
+  else namenull <- sapply(dimnames(data), is.null)
+  if (any(namenull[-margin])) {
+    dims <- !(seq_len(3) == margin)
+    dimnames(data)[dims & namenull] <- list(paste0("Row", seq_len(J)), paste0("Col", seq_len(K)))[namenull[-margin]]
+  }
+  
   ## If nclust is of length one, expand it to length 4
   if (length(nclust) == 1) nclust <- rep(nclust, 4)
   if (length(nclust) != 4) stop("nclust should be either of length 1 or 4.")
   
-  ## Interactions
-  int <- int.lsbclust(data = data, margin = margin, delta = delta, nclust = nclust[4L], ndim = ndim,
-                      fixed = fixed, nstart = nstart, starts = starts, alpha = alpha, 
-                      parallelize = parallelize, maxit = maxit, verbose = verbose, method = method)
-  
   ## Other components
   orc <- orc.lsbclust(data = data, margin = margin, delta = delta, nclust = nclust[-4L], 
-                      sep.nclust = sep.nclust, type = type, nstart = nstart.kmeans, ...)
+                      sep.nclust = sep.nclust, type = type, nstart = nstart.kmeans, 
+                      verbose = verbose, ...)
   if (all(delta == c(1, 0, 0, 0)) || all(delta == c(0, 1, 0, 0)) || 
         all(delta == c(0, 1, 1, 0)) || all(delta == c(1, 0, 0, 1))) {
     orc <- list(orc)
     names(orc) <- ifelse(delta[1], "columns", "rows")
   }
   ind.orc <- c("overall", "rows", "columns") %in% names(orc)
+  
+  ## Interactions
+  if (verbose) {
+    cat(paste0("Interaction clustering (", nstart, " starts)..."))
+  }
+  int <- int.lsbclust(data = data, margin = margin, delta = delta, nclust = nclust[4L], ndim = ndim,
+                      fixed = fixed, nstart = nstart, starts = starts, alpha = alpha, 
+                      parallelize = parallelize, maxit = maxit, verbose = verbose, method = method)
+  if (verbose) {
+    cat("\tDONE\n")
+  }
   
   ## Total degrees-of-freedom
   df <- unlist(c(sapply(orc, '[[', 'df'), interactions = int$df))

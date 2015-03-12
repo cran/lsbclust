@@ -1,8 +1,8 @@
 Package: lsbclust
 Type: Package
 Title: Least-Squares Bilinear Clustering for Three-Way Data
-Version: 1.0.1
-Date: 2015-02-10
+Version: 1.0.2
+Date: 2015-03-12
 Author: Pieter Schoonees [aut, cre], Patrick Groenen [ctb]
 Maintainer: Pieter Schoonees <schoonees@gmail.com>
 Authors@R: c(person(given = "Pieter", family = "Schoonees", role = c("aut",
@@ -27,6 +27,6 @@ ByteCompile: yes
 BuildResaveData: yes
 Suggests: testthat
 NeedsCompilation: yes
-Packaged: 2015-02-16 12:19:11 UTC; pieter
+Packaged: 2015-03-11 22:38:42 UTC; pieter
 Repository: CRAN
-Date/Publication: 2015-02-16 14:08:14
+Date/Publication: 2015-03-12 01:11:46
