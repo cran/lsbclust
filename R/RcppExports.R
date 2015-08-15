@@ -14,6 +14,46 @@ ClustMeans <- function(nclust, start, data) {
     .Call('lsbclust_ClustMeans', PACKAGE = 'lsbclust', nclust, start, data)
 }
 
+#' @title C++ Function for Weighted K-Means
+#' @name KMeansW
+#' @description This function does a weighted K-means clustering.
+#' @param nclust The number of clusters.
+#' @param start The current cluster membership vector.
+#' @param weight The vector of length \code{nrows(data)} with weights with nonnegative elements.
+#' @param data The concatenated data, with N rows and M columns. Currently, the columns are clustered.
+#' @param eps Numerical absolute convergence criteria for the K-means.
+#' @param IterMax Integer giving the maximum number of iterations allowed for the K-means.
+#' @param cm Numeric vector of class indicators.
+#' @param M Matrix of cluster means.
+#' @return A list with the folowing values.
+#' \item{centers}{the \code{nclust} by M matrix \code{centers} of cluster means.} 
+#' \item{cluster}{vector of length N with cluster memberships.} 
+#' \item{loss}{vector of length \code{IterMax} with the first entries containing the loss.} 
+#' \item{iterations}{the number of iterations used (corresponding to the number 
+#' of nonzero entries in \code{loss})} 
+#' @examples 
+#' set.seed(1)
+#' clustmem <- sample.int(n = 10, size = 100, replace = TRUE)
+#' mat <- rbind(matrix(rnorm(30*4, mean = 3), nrow = 30), 
+#'              matrix(rnorm(30*4, mean = -2), nrow = 30), 
+#'              matrix(rnorm(40*4, mean = 0), nrow = 40))
+#' wt <- runif(100)
+#' testMeans <- lsbclust:::ComputeMeans(cm = clustmem, data = mat, weight = wt, nclust = 3)
+#' testK <- lsbclust:::KMeansW(start = clustmem, data = mat, weight = wt, nclust = 3)
+ComputeMeans <- function(cm, data, weight, nclust) {
+    .Call('lsbclust_ComputeMeans', PACKAGE = 'lsbclust', cm, data, weight, nclust)
+}
+
+#' @rdname KMeansW
+AssignCluster <- function(data, weight, M, nclust) {
+    .Call('lsbclust_AssignCluster', PACKAGE = 'lsbclust', data, weight, M, nclust)
+}
+
+#' @rdname KMeansW
+KMeansW <- function(nclust, start, data, weight, eps = 1e-8, IterMax = 100L) {
+    .Call('lsbclust_KMeansW', PACKAGE = 'lsbclust', nclust, start, data, weight, eps, IterMax)
+}
+
 #' @rdname LossMat
 #' @title C++ Function for Interaction Loss Function
 #' @name LossMat

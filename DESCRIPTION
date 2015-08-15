@@ -1,7 +1,7 @@
 Package: lsbclust
 Type: Package
 Title: Least-Squares Bilinear Clustering for Three-Way Data
-Version: 1.0.2
+Version: 1.0.3
 Date: 2015-03-12
 Author: Pieter Schoonees [aut, cre], Patrick Groenen [ctb]
 Maintainer: Pieter Schoonees <schoonees@gmail.com>
@@ -18,15 +18,15 @@ Description: Functions for performing least-squares bilinear clustering of three
     special algorithm is implemented for the interactions. Plotting methods are provided, including 
     biplots for the low-rank approximations of the interactions.
 License: GPL (>= 2)
-Depends: R (>= 3.1.2), stats, parallel, ggplot2
-Imports: plyr, clue, grid, gridExtra, reshape2, Rcpp
+Depends: R (>= 3.2.1), stats, parallel, ggplot2
+Imports: plyr, clue, grid, gridExtra, reshape2, Rcpp, graphics, methods
 LinkingTo: Rcpp
 LazyData: yes
 LazyLoad: yes
 ByteCompile: yes
-BuildResaveData: yes
+BuildResaveData: best
 Suggests: testthat
 NeedsCompilation: yes
-Packaged: 2015-03-11 22:38:42 UTC; pieter
+Packaged: 2015-08-14 21:16:46 UTC; pieter
 Repository: CRAN
-Date/Publication: 2015-03-12 01:11:46
+Date/Publication: 2015-08-15 00:59:41

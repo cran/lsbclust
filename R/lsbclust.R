@@ -58,6 +58,9 @@
 #' @export
 #' @references Schoonees, P.C., Groenen, P.J.F., Van de Velden, M. Least-squares Bilinear Clustering
 #' of Three-way Data. Econometric Institute Report, EI2014-23.
+#' @importFrom graphics plot
+#' @importFrom methods is
+#' @import stats
 lsbclust <- function(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim = 2,
                      fixed = c("none", "rows", "columns"), nstart = 20, starts = NULL, 
                      nstart.kmeans = 500, alpha = 0.5, parallelize = FALSE, maxit = 100, verbose = 1, 
