@@ -78,10 +78,9 @@
 #' indicating the \code{n} argument passed to \code{\link{pretty}}.
 #' @keywords hplot
 #' @method plot int.lsbclust
-#' @importFrom grid arrow unit
 #' @export
 plot.int.lsbclust <- function(x, which = seq_len(nclust), plot.type = c("biplots", "means", "estimates"), 
-                              segments = NULL,  biplot.axes = FALSE, nmarkers = 5, alpha = NULL, 
+                              segments = NULL,  biplot.axes = TRUE, nmarkers = 5, alpha = NULL, 
                               check.alpha = TRUE, fix.alpha = FALSE, probs = 0, arrange = FALSE, 
                               fix.limits = TRUE, limit.exp = 1.05, lambda.scale  = TRUE, 
                               procrustes.rotation = x$fixed == "none", 
@@ -560,13 +559,13 @@ plot.int.lsbclust <- function(x, which = seq_len(nclust), plot.type = c("biplots
         ## Add biplot axis ablines
         if (any(draw.axis$rows)) {
           plots[[i]] <- plots[[i]] + 
-            geom_abline(data = dfC.cur[draw.axis$rows, ], mapping = aes(slope = y / x), 
+            geom_abline(data = dfC.cur[draw.axis$rows, ], mapping = aes(intercept = 0, slope = y / x), 
                         colour = axis.col, size = axis.size)
         }
         if (any(draw.axis$columns)) {
           plots[[i]] <- plots[[i]] + 
             geom_abline(data = dfD.cur[draw.axis$columns, ], 
-                        mapping = aes(slope = y / x), colour = axis.col, size = axis.size)
+                        mapping = aes(intercept = 0, slope = y / x), colour = axis.col, size = axis.size)
         }
         
         if (any(unlist(draw.axis))) {

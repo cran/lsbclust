@@ -33,7 +33,7 @@ plot.col.kmeans <- function(x, which = 1L, ...){
                    Column = factor(rep(colnames(x$centers), k), levels = rev(colnames(x$centers))))
   if (show[1L]){
     plot1 <- ggplot(data = df, mapping = aes(x = Value, y = Column, group = Cluster, fill = Cluster)) + 
-      geom_vline(colour = "grey", linetype = 2) + 
+      geom_vline(colour = "grey", linetype = 2, xintercept = 0) + 
       geom_segment(mapping = aes(yend = Column), xend = 0, size = 0.5) + 
       geom_point(size = 3, shape = 21) + facet_wrap(~ Cluster) + theme_bw(base_size = 16) + 
       theme(panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank(), 

@@ -28,10 +28,22 @@ plot.ovl.kmeans <- function(x, which = 1L, ...){
                    Cluster = factor(paste0("O", 1:nrow(x$centers))),
                    Size = paste("n =", tabulate(x$cluster)))
   if(show[1L]){
-    plot1 <- ggplot(data = df) + geom_bar(aes(x = Cluster, y = Mean), stat = "identity") +
-      geom_text(aes(x = Cluster, y = Mean, ymax = Mean, label = Size), vjust = -0.5, 
-                position = position_dodge(height = 1)) + 
-      theme(...) + ggtitle("Overall means")
+    ## Set y-limits
+    if (all(x$centers > 0)) {
+      ylims <- c(0, ceiling(max(x$centers)))
+    } else if (all(x$centers < 0 )) { 
+      ylims <- c(floor(min(x$centers)), 0)
+    } else {
+      ylims <- c(floor(min(x$centers)), ceiling(max(x$centers))) 
+    }
+    
+    plot1 <- ggplot(data = df) + geom_segment(aes(y = Mean, x = Cluster, xend = Cluster), 
+                                              yend = 0, stat = "identity") +
+      geom_point(aes(y = Mean, x = Cluster, fill = Cluster), size = 3, shape = 21, show.legend = FALSE) + 
+      geom_text(aes(x = Cluster, y = Mean, label = Size), vjust = -0.5, 
+                position = position_nudge(y = 0.01 * diff(ylims))) + 
+      theme(...) + ggtitle("Overall means") + ylim(ylims)
+      
   }
   mget(paste0("plot", which))
 }
