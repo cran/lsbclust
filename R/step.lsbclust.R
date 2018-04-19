@@ -24,7 +24,7 @@
 #' supplied, random initializations will be generated (passed to \code{\link{int.lsbclust}}).
 #' @param alpha Numeric value in [0, 1] which determines how the singular values are distributed
 #' between rows and columns (passed to \code{\link{int.lsbclust}}).
-#' @param parallelize Logical indicating whether to parallelize over different starts or not 
+#' @param parallel Logical indicating whether to parallelize over different starts or not 
 #' (passed to \code{\link{int.lsbclust}}).
 #' @param maxit The maximum number of iterations allowed in the interaction clustering.
 #' @param verbose The number of iterations after which information on progress is provided 
@@ -39,7 +39,7 @@
 #' @examples
 #' m <- step.lsbclust(data = dcars, margin = 3, delta = c(1, 0, 1, 0), nclust = 4:5, 
 #'                      ndim = 2, fixed = "columns", nstart = 1, nstart.kmeans = 100, 
-#'                      parallelize = FALSE)
+#'                      parallel = FALSE)
 #'                      
 #' ## For a list of all deltas                     
 #' delta <- expand.grid(replicate(4, c(0,1), simplify = FALSE))
@@ -49,10 +49,10 @@
 #' delta <- as.list(as.data.frame(t(delta)))
 #' m2 <- step.lsbclust(data = dcars, margin = 3, delta = delta, nclust = 4:5, 
 #'                      ndim = 2, fixed = "columns", nstart = 1, nstart.kmeans = 100, 
-#'                      parallelize = FALSE)
+#'                      parallel = FALSE)
 step.lsbclust <- function(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim = 2,
                           fixed = c("none", "rows", "columns"), nstart = 20, starts = NULL, 
-                          nstart.kmeans = 500, alpha = 0.5, parallelize = FALSE, maxit = 100, 
+                          nstart.kmeans = 500, alpha = 0.5, parallel = FALSE, maxit = 100, 
                           verbose = -1, type = NULL,  ...) {
   
   ## Start timing
@@ -62,7 +62,7 @@ step.lsbclust <- function(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim
   if (is.list(delta)) {
     return(lapply(delta, step.lsbclust, data = data, margin = margin, nclust = nclust, ndim = ndim, 
                   fixed = fixed, nstart = nstart, starts = starts, nstart.kmeans = nstart.kmeans, 
-                  alpha = alpha, parallelize = parallelize, maxit = maxit, verbose = verbose, 
+                  alpha = alpha, parallel = parallel, maxit = maxit, verbose = verbose, 
                   type = type, ...))
   }
   
@@ -119,7 +119,7 @@ step.lsbclust <- function(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim
   if (!is.null(nclust$interactions))
       res$interactions <- int.lsbclust(data = data, margin = margin, delta = delta, nclust = nclust$interactions, 
                                    ndim = ndim, fixed = fixed, nstart = nstart, starts = starts, 
-                                   alpha = alpha, parallelize = parallelize, maxit = maxit, 
+                                   alpha = alpha, parallel = parallel, maxit = maxit, 
                                    verbose = verbose, method = NULL)
   
   ## Extract losses

@@ -25,4 +25,3 @@ Only rotations / reflections are considered -- no scaling or translation factors
 \references{
 Gower, J. C., & Dijksterhuis, G. B. (2004). Procrustes problems (Vol. 3). Oxford: Oxford University Press.
 }
-

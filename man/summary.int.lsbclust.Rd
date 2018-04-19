@@ -16,4 +16,3 @@
 \description{
 Some goodness-of-fit diagnostics are provided for all three margins.
 }
-

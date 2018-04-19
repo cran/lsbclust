@@ -6,4 +6,4 @@ bibentry(bibtype = "Manual",
          author = c(person(given = c("Pieter", "C."), family = "Schoonees")),
          year = year,
          note = note,
-         url = "http://CRAN.R-project.org/package=lsbclust")
+         url = "https://CRAN.R-project.org/package=lsbclust")

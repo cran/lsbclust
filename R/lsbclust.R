@@ -25,7 +25,7 @@
 #' supplied, random initializations will be generated (passed to \code{\link{int.lsbclust}}).
 #' @param alpha Numeric value in [0, 1] which determines how the singular values are distributed
 #' between rows and columns (passed to \code{\link{int.lsbclust}}).
-#' @param parallelize Logical indicating whether to parallelize over different starts or not 
+#' @param parallel Logical indicating whether to parallel over different starts or not 
 #' (passed to \code{\link{int.lsbclust}}).
 #' @param maxit The maximum number of iterations allowed in the interaction clustering.
 #' @param verbose Integer controlling the amount of information printed: 0 = no information, 
@@ -61,9 +61,9 @@
 #' @importFrom graphics plot
 #' @importFrom methods is
 #' @import stats
-lsbclust <- function(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim = 2,
-                     fixed = c("none", "rows", "columns"), nstart = 20, starts = NULL, 
-                     nstart.kmeans = 500, alpha = 0.5, parallelize = FALSE, maxit = 100, verbose = 1, 
+lsbclust <- function(data, margin = 3L, delta = c(1L, 1L, 1L, 1L), nclust, ndim = 2L,
+                     fixed = c("none", "rows", "columns"), nstart = 20L, starts = NULL, 
+                     nstart.kmeans = 500L, alpha = 0.5, parallel = FALSE, maxit = 100L, verbose = 1, 
                      method = "diag", type = NULL, sep.nclust = TRUE, ...) {
   
   ## Capture call, start time
@@ -123,7 +123,7 @@ lsbclust <- function(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim = 2,
   }
   int <- int.lsbclust(data = data, margin = margin, delta = delta, nclust = nclust[4L], ndim = ndim,
                       fixed = fixed, nstart = nstart, starts = starts, alpha = alpha, 
-                      parallelize = parallelize, maxit = maxit, verbose = verbose, method = method)
+                      parallel = parallel, maxit = maxit, verbose = verbose, method = method)
   if (verbose) {
     cat("\tDONE\n")
   }
@@ -143,6 +143,32 @@ lsbclust <- function(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim = 2,
   clust <- do.call(cbind, lapply(out[1:4], "[[", "cluster"))
   out$cluster <- clust
   
+  ## Compute fitted values
+  fitted <- array(0, dim = dim(data))
+  odelta <- delta[1] * delta[3] + delta[2] * delta[4] - delta[1] * delta[2]
+  
+  ## Permute so third way represents observations
+  fitted <- aperm.default(fitted, perm = int$perm)
+  
+  ## Construct array of fitted values
+  for (i in seq_len(dim(data)[margin])) {
+    fitted[, , i] <- int$means[[int$cluster[i]]]
+    if (odelta)
+      fitted[, , i] <- fitted[, , i] + orc$overall$centers[orc$overall$cluster[i], ]
+    if (delta[2L])
+      fitted[, , i] <- fitted[, , i] + orc$rows$centers[orc$rows$cluster[i], ] %o% rep(1L, K) 
+    if (delta[1L])
+      fitted[, , i] <- fitted[, , i] + rep(1L, J) %o% orc$columns$centers[orc$columns$cluster[i], ]
+  }
+  dimnames(fitted) <- dimnames(data)
+  
+  ## Permute to original shape
+  fitted <- aperm.default(fitted, perm = order(int$perm))
+  
+  ## Add fitted to out
+  out$fitted <- fitted
+  
+  ## Update S3 class
   class(out) <- "lsbclust"
   return(out)
 }

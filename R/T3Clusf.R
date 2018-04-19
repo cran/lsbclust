@@ -13,11 +13,17 @@
 #' @param alpha Numeric value giving the fuzziness parameter.
 #' @param eps Small numeric value giving the empirical convergence threshold.
 #' @param maxit Integer giving the maximum number of iterations allowed.
-#' @param verbose Integer giving the number of iterations after which the loss valus is printed.
-#' @param nr.starts Integer giving the number of random starts required.
+#' @param verbose Integer giving the number of iterations after which the loss values are printed.
+#' @param nstart Integer giving the number of random starts required.
 #' @param parallel Logical indicating whether to parallelize over random starts if 
-#' \code{nr.starts > 1}.
-#' @param mc.cores Argument passed to \code{\link{mclapply}}.
+#' \code{nstart > 1}.
+#' @param mc.cores Argument passed to \code{\link{makeCluster}}.
+#' @param minsize Integer giving the minimum size of cluster to uphold when reinitializing
+#' empty clusters.
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach foreach %dopar%
+#' @importFrom utils setTxtProgressBar txtProgressBar
 #' @export
 #' @references 
 #' Rocci, R., & Vichi, M. (2005). \emph{Three-mode component analysis with crisp or fuzzy partition of units}. 
@@ -25,34 +31,51 @@
 #' @examples 
 #' data("dcars")
 #' set.seed(13)
-#' res <- T3Clusf(X = dcars, Q = 3, R = 2, G = 3, alpha = 2)
+#' res <- T3Clusf(X = carray(dcars), Q = 3, R = 2, G = 3, alpha = 1)
 #' 
 T3Clusf <- function(X, Q, R = Q, G = 2, margin = 3L, alpha = 1, eps = 1e-8, maxit = 100L,
-                    verbose = 1, nr.starts = 1L, parallel = TRUE, 
-                    mc.cores = detectCores() - 1) {
+                    verbose = 1, nstart = 1L, parallel = TRUE, 
+                    mc.cores = detectCores() - 1L, minsize  = 3L) {
   
   ## Recurse if multiple starts needed
-  if (nr.starts > 1L) {
+  if (nstart > 1L) {
     if (parallel) {
-      out <- mclapply(seq_len(nr.starts), function(a) T3Clusf(X = X, Q = Q, R = R, G = G, 
-                      margin = margin, alpha = alpha, eps = eps, maxit = maxit, 
-                      verbose = verbose, nr.starts = 1L), mc.cores = mc.cores)
+      if (.Platform$OS.type == "windows") {
+        cl <- makeCluster(mc.cores, type = "PSOCK")
+      } else {
+        cl <- makeCluster(mc.cores, type = "FORK")
+      }
+      registerDoParallel(cl)
+      out <- foreach (i = seq_len(nstart)) %dopar%  {
+        T3Clusf(X = X, Q = Q, R = R, G = G, margin = margin, alpha = alpha, eps = eps, 
+                maxit = maxit, verbose = verbose, nstart = 1L)
+      }
+      stopCluster(cl)
     } else {
-      out <- replicate(nr.starts, T3Clusf(X = X, Q = Q, R = R, G = G, margin = margin, 
+      out <- replicate(nstart, T3Clusf(X = X, Q = Q, R = R, G = G, margin = margin, 
                                           alpha = alpha, eps = eps, maxit = maxit, 
-                                          verbose = verbose, nr.starts = 1L))
+                                          verbose = verbose, nstart = 1L), simplify = FALSE)
     }
+    
+    ## Determine the start with the best loss
+    allloss <- sapply(out, "[[", "minloss")
+    wmin <- which.min(allloss)
+    
+    ## Return only this start, with loss added
+    out <- out[[wmin]]
+    out$allloss <- allloss
     return(out)
   }
   
   ## Call
   cll <- match.call()
   
-  ## Permute array so that clustering is over FIRST dimension
+  ## Permute array so that clustering is over FIRST way
   if (!is(X, "array")) stop("'X' must be an array.")
   if (length(dim(X)) != 3) stop("'X' must be a three-dimensional array.")
   if (!(margin %in% seq_len(3)))  stop("'margin' must be either 1, 2, or 3.")
-  X <- aperm.default(X, perm = c(margin, seq_len(3)[-margin]))
+  perm <- c(margin, seq_len(3)[-margin])
+  X <- aperm.default(X, perm = perm)
   dims <- dim(X)
   Xmat <- matrix(X, nrow = dims[1], ncol = prod(dims[-1]))
   
@@ -77,13 +100,20 @@ T3Clusf <- function(X, Q, R = Q, G = 2, margin = 3L, alpha = 1, eps = 1e-8, maxi
     U <- matrix(runif(dims[1] * G), nrow = dims[1], ncol = G)
     U <- diag(1 / rowSums(U)) %*% U
   }
-  ## Staring values of Xmns (KJ x G) and Y (G x QR)
+  ## Starting values of Xmns (KJ x G) and Y (G x QR)
   Xmns <- apply(U^alpha, 2, function(z) apply(z * X, 2:3, sum) / sum(z))
   Y <- crossprod(Xmns, kronecker(C, B))
+  
+  ## Denominator for standardizing the loss
+  maxloss <- sum(X^2)
   
   ## Monitor loss
   loss <- rep(NA, maxit)
   iter <- 0L
+  
+  ## Monitor empty clusters
+  nempty <- rep(0L, maxit)
+  iterempty <- rep(FALSE, maxit)
   
   ## Iterate
   while (iter < maxit) {
@@ -100,12 +130,45 @@ T3Clusf <- function(X, Q, R = Q, G = 2, margin = 3L, alpha = 1, eps = 1e-8, maxi
       U <- t(dists / matrix(colSums(dists), nrow = G, ncol = dims[1], byrow = TRUE))
     }
     
+    ## Check for empty clusters if alpha == 1
+    if (alpha == 1) {
+      clustsize <- colSums(U)
+      zeroclass <- seq_len(G)[clustsize == 0]
+      if (length(zeroclass) > 0) {
+        
+        ## Monitor empty clusters
+        iterempty[iter] <- TRUE
+        nempty[iter] <- sum(clustsize == 0)
+        
+        ## Reinitialize empty cluster(s) with worst fitting observation(s)
+        ## Cluster membership and distances
+        clustmem <- apply(dists, 2L, which.min)
+        clustdists <- dists[cbind(clustmem, seq_len(dims[1]))]
+        
+        ## Order from worst to best-fitting
+        ord <- order(clustdists, decreasing = TRUE)
+        
+        ## Remove objects from classes smaller than or equal to minsize from consideration
+        smallclasses <- which(clustsize <= minsize)
+        ord <- setdiff(ord, which(clustmem %in% smallclasses))
+        
+        ## Move worst fitting observations in consideration set to empty cluster(s)
+        id <- ord[seq_len(sum(clustsize == 0))]
+        U[id, ] <- 0L
+        U[cbind(id, zeroclass)] <- 1
+        
+        ## Print message
+        message("T3Clusf: ", sum(clustsize == 0), " empty cluster(s) re-iniatilized.")
+        
+        ## Update clustsize
+        clustsize <- colSums(U)
+      }
+    }
+    
     ## Update Xmns and Y
     Xmns <- apply(U^alpha, 2, function(z) apply(z * X, 2:3, sum) / sum(z))
     Y <- crossprod(Xmns, kronecker(C, B))
 
-    ## Check for empty clusters
-    
     ## Update B
     omega <- colSums(U^alpha)
     CC <- tcrossprod(C)
@@ -136,10 +199,10 @@ T3Clusf <- function(X, Q, R = Q, G = 2, margin = 3L, alpha = 1, eps = 1e-8, maxi
       losscomps[i, ] <- colSums((matrix(Xmat[i, ], nrow = prod(dims[-1]), ncol = G) - target)^2)
     }
     indloss <- rowSums(U^alpha * losscomps)
-    loss[iter] <- sum(indloss)
+    loss[iter] <- sum(indloss) / maxloss
     
     ## Monitor convergence
-    if (iter %% verbose == 0)
+    if (verbose > 0 && iter %% verbose == 0)
       cat(sprintf(paste0("%", nchar(as.character(maxit)), "d"), iter), 
           "| Loss =", sprintf("%5f", loss[iter]), "\n")
     
@@ -151,10 +214,36 @@ T3Clusf <- function(X, Q, R = Q, G = 2, margin = 3L, alpha = 1, eps = 1e-8, maxi
     }
   }
   
+  ## Add rownames
+  rownames(B) <- dimnames(X)[[2]]
+  rownames(C) <- dimnames(X)[[3]]
+  
   ## Reshape Y into array
   Yarr <- array(t(Y), dim = c(Q, R, G))
   
-  out <- list(U = U, B = B, C = C, Y = Yarr, iter = iter, loss = loss[seq_len(iter)], 
-              minloss = loss[iter], sizes = colSums(U), call = cll)
+  ## Calculate cluster means
+  means <- alply(Yarr, 3L, function(x) B %*% tcrossprod(x, C))
+  
+  ## Create output list
+  out <- list(G = U, B = B, C = C, H = Yarr, cluster = apply(U, 1, which.max), 
+              means = means, iter = iter, loss = loss[seq_len(iter)], 
+              minloss = loss[iter], sizes = colSums(U), 
+              nempty = nempty, iterempty = iterempty, call = cll)
+  
+  ## Construct fitted data
+  if (alpha == 1L) {
+    fitted <- array(unlist(means[out$cluster]), dim = dim(X)[order(perm)])  
+  } else {
+    fitted <- array(NA, dim = dim(X))
+    for (i in seq_len(dims[1L]))
+      fitted[i, , ] <- Reduce("+", Map("*", U[i, ], means))
+    fitted <- aperm(fitted, perm = order(perm))
+  }
+  dimnames(fitted) <- dimnames(X)[order(perm)]
+  out$fitted <- fitted
+  out$alpha <- alpha
+  
+  ## Make S3 class
+  class(out) <- c("T3Clusf", "list")
   return(out)
 }

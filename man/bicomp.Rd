@@ -25,4 +25,3 @@ of matrices returned.
 Decomposes a matrix into an overall mean matrix, row margins matrix, column margins matrix
 and an interaction matrix, depending on \code{delta}.
 }
-

@@ -20,4 +20,3 @@ to 8 variables. A rating scale from 1 to 10 was used.
 data("supermarkets")
 fit <- lsbclust(data = supermarkets, nclust = 6, fixed = "rows", nstart = 2)
 }
-

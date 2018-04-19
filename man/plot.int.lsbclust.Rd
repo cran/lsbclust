@@ -122,4 +122,3 @@ contains either single numeric values each or numeric vectors of the appropriate
 indicating the \code{n} argument passed to \code{\link{pretty}}.
 }
 \keyword{hplot}
-

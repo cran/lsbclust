@@ -6,7 +6,7 @@
 \usage{
 step.lsbclust(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim = 2,
   fixed = c("none", "rows", "columns"), nstart = 20, starts = NULL,
-  nstart.kmeans = 500, alpha = 0.5, parallelize = FALSE, maxit = 100,
+  nstart.kmeans = 500, alpha = 0.5, parallel = FALSE, maxit = 100,
   verbose = -1, type = NULL, ...)
 }
 \arguments{
@@ -40,7 +40,7 @@ supplied, random initializations will be generated (passed to \code{\link{int.ls
 \item{alpha}{Numeric value in [0, 1] which determines how the singular values are distributed
 between rows and columns (passed to \code{\link{int.lsbclust}}).}
 
-\item{parallelize}{Logical indicating whether to parallelize over different starts or not 
+\item{parallel}{Logical indicating whether to parallelize over different starts or not 
 (passed to \code{\link{int.lsbclust}}).}
 
 \item{maxit}{The maximum number of iterations allowed in the interaction clustering.}
@@ -64,7 +64,7 @@ model selection. Each component of the model is fitted separately.
 \examples{
 m <- step.lsbclust(data = dcars, margin = 3, delta = c(1, 0, 1, 0), nclust = 4:5, 
                      ndim = 2, fixed = "columns", nstart = 1, nstart.kmeans = 100, 
-                     parallelize = FALSE)
+                     parallel = FALSE)
                      
 ## For a list of all deltas                     
 delta <- expand.grid(replicate(4, c(0,1), simplify = FALSE))
@@ -74,6 +74,5 @@ delta <- delta[-4,]
 delta <- as.list(as.data.frame(t(delta)))
 m2 <- step.lsbclust(data = dcars, margin = 3, delta = delta, nclust = 4:5, 
                      ndim = 2, fixed = "columns", nstart = 1, nstart.kmeans = 100, 
-                     parallelize = FALSE)
+                     parallel = FALSE)
 }
-

@@ -48,4 +48,3 @@ Van Rosmalen, J., Van Herk, H., & Groenen, P. J. (2010). Identifying
 response styles: A latent-class bilinear multinomial logit model. 
 \emph{Journal of Marketing Research}, 47(1), 157-172.
 }
-

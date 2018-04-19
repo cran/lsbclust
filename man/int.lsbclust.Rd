@@ -6,7 +6,8 @@
 \usage{
 int.lsbclust(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("none",
   "rows", "columns"), nstart = 50, starts = NULL, alpha = 0.5,
-  parallelize = FALSE, maxit = 100, verbose = 1, method = "diag")
+  parallel = FALSE, mc.cores = detectCores() - 1, maxit = 100,
+  verbose = 1, method = "diag", minsize = 3L, return_data = FALSE)
 }
 \arguments{
 \item{data}{A three-way array representing the data.}
@@ -34,7 +35,10 @@ supplied, random initializations will be generated.}
 \item{alpha}{Numeric value in [0, 1] which determines how the singular values are distributed
 between rows and columns.}
 
-\item{parallelize}{Logical indicating whether to parallelize over different starts or not.}
+\item{parallel}{Logical indicating whether to parallelize over different starts or not.}
+
+\item{mc.cores}{The number of cores to use in case \code{parallel = TRUE}, passed to
+\code{\link{makeCluster}}.}
 
 \item{maxit}{The maximum number of iterations allowed.}
 
@@ -44,6 +48,12 @@ each iteration for the interaction clustering.}
 
 \item{method}{The method for calculating cluster agreement across random starts, passed on
 to \code{\link{cl_agreement}}. None is calculated when set to \code{NULL}.}
+
+\item{minsize}{Integer giving the minimum size of cluster to uphold when reinitializing
+empty clusters.}
+
+\item{return_data}{Logical indicating whether to include the data in the return
+value or not}
 }
 \value{
 An object of class \code{int.lsb}
@@ -57,4 +67,3 @@ data("supermarkets")
 out <- int.lsbclust(data = supermarkets, margin = 3, delta = c(1,1,0,0), nclust = 4, ndim = 2, 
            fixed = "rows", nstart = 1, alpha = 0)
 }
-

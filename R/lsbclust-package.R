@@ -11,5 +11,6 @@
 #' @importFrom clue solve_LSAP cl_class_ids is.cl_partition is.cl_hard_partition as.cl_class_ids cl_agreement
 #' @importFrom gridExtra grid.arrange
 #'@importFrom Rcpp evalCpp
-#'@useDynLib lsbclust
-NULL
+#'@useDynLib lsbclust, .registration = TRUE
+utils::globalVariables(c("x", "y", "Cluster", "xorigin", "yorigin", "Column", "Row", "Value", 
+                         "J", "K", "N"))

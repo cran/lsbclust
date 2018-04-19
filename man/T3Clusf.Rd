@@ -5,8 +5,8 @@
 \title{T3Clusf: Tucker3 Fuzzy Cluster Analysis}
 \usage{
 T3Clusf(X, Q, R = Q, G = 2, margin = 3L, alpha = 1, eps = 1e-08,
-  maxit = 100L, verbose = 1, nr.starts = 1L, parallel = TRUE,
-  mc.cores = detectCores() - 1)
+  maxit = 100L, verbose = 1, nstart = 1L, parallel = TRUE,
+  mc.cores = detectCores() - 1L, minsize = 3L)
 }
 \arguments{
 \item{X}{Three-way data array, with no missing values.}
@@ -28,14 +28,17 @@ modes, in the original order, corresponds to \code{Q} and \code{R}.}
 
 \item{maxit}{Integer giving the maximum number of iterations allowed.}
 
-\item{verbose}{Integer giving the number of iterations after which the loss valus is printed.}
+\item{verbose}{Integer giving the number of iterations after which the loss values are printed.}
 
-\item{nr.starts}{Integer giving the number of random starts required.}
+\item{nstart}{Integer giving the number of random starts required.}
 
 \item{parallel}{Logical indicating whether to parallelize over random starts if 
-\code{nr.starts > 1}.}
+\code{nstart > 1}.}
 
-\item{mc.cores}{Argument passed to \code{\link{mclapply}}.}
+\item{mc.cores}{Argument passed to \code{\link{makeCluster}}.}
+
+\item{minsize}{Integer giving the minimum size of cluster to uphold when reinitializing
+empty clusters.}
 }
 \description{
 This is an implementation of the T3Clusf algorithm of Rocci & Vichi (2005).
@@ -43,11 +46,10 @@ This is an implementation of the T3Clusf algorithm of Rocci & Vichi (2005).
 \examples{
 data("dcars")
 set.seed(13)
-res <- T3Clusf(X = dcars, Q = 3, R = 2, G = 3, alpha = 2)
+res <- T3Clusf(X = carray(dcars), Q = 3, R = 2, G = 3, alpha = 1)
 
 }
 \references{
 Rocci, R., & Vichi, M. (2005). \emph{Three-mode component analysis with crisp or fuzzy partition of units}. 
 Psychometrika, 70(4), 715-736.
 }
-

@@ -16,4 +16,3 @@
 \description{
 Summarize a \code{lsbclust} object.
 }
-

@@ -4,9 +4,9 @@
 \alias{lsbclust}
 \title{Least-squares Bilinear Clustering of Three-way Data}
 \usage{
-lsbclust(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim = 2,
-  fixed = c("none", "rows", "columns"), nstart = 20, starts = NULL,
-  nstart.kmeans = 500, alpha = 0.5, parallelize = FALSE, maxit = 100,
+lsbclust(data, margin = 3L, delta = c(1L, 1L, 1L, 1L), nclust, ndim = 2L,
+  fixed = c("none", "rows", "columns"), nstart = 20L, starts = NULL,
+  nstart.kmeans = 500L, alpha = 0.5, parallel = FALSE, maxit = 100L,
   verbose = 1, method = "diag", type = NULL, sep.nclust = TRUE, ...)
 }
 \arguments{
@@ -38,7 +38,7 @@ supplied, random initializations will be generated (passed to \code{\link{int.ls
 \item{alpha}{Numeric value in [0, 1] which determines how the singular values are distributed
 between rows and columns (passed to \code{\link{int.lsbclust}}).}
 
-\item{parallelize}{Logical indicating whether to parallelize over different starts or not 
+\item{parallel}{Logical indicating whether to parallel over different starts or not 
 (passed to \code{\link{int.lsbclust}}).}
 
 \item{maxit}{The maximum number of iterations allowed in the interaction clustering.}
@@ -91,4 +91,3 @@ of Three-way Data. Econometric Institute Report, EI2014-23.
 \seealso{
 \code{\link{int.lsbclust}}, \code{\link{orc.lsbclust}}
 }
-

@@ -19,24 +19,35 @@
 #' supplied, random initializations will be generated.
 #' @param alpha Numeric value in [0, 1] which determines how the singular values are distributed
 #' between rows and columns.
-#' @param parallelize Logical indicating whether to parallelize over different starts or not.
+#' @param parallel Logical indicating whether to parallelize over different starts or not.
+#' @param mc.cores The number of cores to use in case \code{parallel = TRUE}, passed to
+#' \code{\link{makeCluster}}.
 #' @param maxit The maximum number of iterations allowed.
 #' @param verbose Integer controlling the amount of information printed: 0 = no information, 
 #' 1 = Information on random starts and progress, and 2 = information is printed after
 #' each iteration for the interaction clustering.
 #' @param method The method for calculating cluster agreement across random starts, passed on
 #' to \code{\link{cl_agreement}}. None is calculated when set to \code{NULL}.
+#' @param minsize Integer giving the minimum size of cluster to uphold when reinitializing
+#' empty clusters.
+#' @param return_data Logical indicating whether to include the data in the return
+#' value or not
 #' @return An object of class \code{int.lsb}
-#' @import parallel
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach foreach %dopar%
 #' @export
 #' @examples
 #' data("supermarkets")
 #' out <- int.lsbclust(data = supermarkets, margin = 3, delta = c(1,1,0,0), nclust = 4, ndim = 2, 
 #'            fixed = "rows", nstart = 1, alpha = 0)
 #' @export
-int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("none", "rows", "columns"), 
-                         nstart = 50, starts = NULL, alpha = 0.5, parallelize = FALSE, maxit = 100, 
-                         verbose = 1, method = "diag"){
+int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, 
+                         fixed = c("none", "rows", "columns"), 
+                         nstart = 50, starts = NULL, alpha = 0.5, 
+                         parallel = FALSE, mc.cores = detectCores() - 1, 
+                         maxit = 100, verbose = 1, method = "diag", 
+                         minsize = 3L, return_data = FALSE){
   
   ## Capture call, start time, original data
   time0 <- proc.time()[3]
@@ -47,7 +58,7 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
   if (length(nclust) > 1){
     return(lapply(nclust, int.lsbclust, data = data, margin = margin, delta = delta, 
                   ndim = ndim, fixed = fixed, nstart = nstart, starts = starts, alpha = alpha,
-                  parallelize = parallelize, maxit = maxit, verbose = verbose, method = method))
+                  parallel = parallel, maxit = maxit, verbose = verbose, method = method))
   }
   
   ## Sanity checks and coercion
@@ -59,7 +70,8 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
   fixed <- match.arg(tolower(fixed[1L]), choices = c("none", "rows", "columns"))
   
   ## Permute the dimensions of the data so that clustering is over the last dimension
-  data <- aperm.default(data, perm = c((1:3)[-margin], margin))
+  perm <- c((1:3)[-margin], margin)
+  data <- aperm.default(data, perm = perm)
   
   ## Get dimensions
   dims <- dim(data)
@@ -75,8 +87,18 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
 
   ## Generate random starts for cluster membership if not supplied
   if (is.null(starts)){
+    ## Function to generate start without empty clusters
+    genstart <- function(prob, n = nclust, size = N, replace = TRUE) {
+      start <- sample.int(n = n, size = size, replace = replace, prob = prob)
+      counts <- table(factor(start, levels = seq_len(n)))
+      if (any(counts == 0)) {
+        ## Move random person(s) to empty cluster(s)
+        start[sample.int(n = size, size = sum(counts == 0))] <- which(counts == 0)
+      }
+      return(start)
+    }
     starts <- lapply(X = replicate(nstart, runif(nclust) + 5/N, simplify = FALSE), 
-                     FUN = sample.int, n = nclust, size = N, replace = TRUE)
+                     FUN = genstart, n = nclust, size = N, replace = TRUE)
   } else {
     starts <- as.list(starts)
     nstart <- length(starts)
@@ -127,8 +149,8 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
       svdX <- svd(Xc, nu = ndim, nv = ndim)
       
       ## Determine updates from SVD
-      C <- svdX$u %*% diag(svdX$d[1:ndim]^alpha)
-      Dstar <- svdX$v %*% diag(svdX$d[1:ndim]^(1 - alpha))
+      C <- svdX$u %*% diag(svdX$d[1:ndim]^alpha, nrow = ndim, ncol = ndim)
+      Dstar <- svdX$v %*% diag(svdX$d[1:ndim]^(1 - alpha), nrow = ndim, ncol = ndim)
       
       ## Rescale Dstar and divide up in Du's
       Dstar.rs <- Dstar * 1/sqrt(nvec) %x% matrix(1, K, ndim)
@@ -150,8 +172,8 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
       svdX <- svd(Xr, nu = ndim, nv = ndim)
       
       ## Determine updates from SVD
-      Cstar <- svdX$u %*% diag(svdX$d[1:ndim]^alpha)
-      D <- svdX$v %*% diag(svdX$d[1:ndim]^(1 - alpha))
+      Cstar <- svdX$u %*% diag(svdX$d[1:ndim]^alpha, nrow = ndim, ncol = ndim)
+      D <- svdX$v %*% diag(svdX$d[1:ndim]^(1 - alpha), nrow = ndim, ncol = ndim)
       
       ## Rescale Cstar and divide up in Cu's
       Cstar.rs <- Cstar * 1/sqrt(nvec) %x% matrix(1, J, ndim)
@@ -170,8 +192,8 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
       svdX <- lapply(mns, svd, nu = ndim, nv = ndim)
       
       ## Calculate Cu's and Du's
-      Cs <- lapply(svdX, function(x) x$u %*% diag(x$d[1:ndim]^alpha))
-      Ds <- lapply(svdX, function(x) x$v %*% diag(x$d[1:ndim]^(1 - alpha)))
+      Cs <- lapply(svdX, function(x) x$u %*% diag(x$d[1:ndim]^alpha, nrow = ndim, ncol = ndim))
+      Ds <- lapply(svdX, function(x) x$v %*% diag(x$d[1:ndim]^(1 - alpha), nrow = ndim, ncol = ndim))
       
       ## Return updates of Cs and Ds
       out <- list(C = Cs, D = Ds, svd = svdX, Xc = NULL, Xr = NULL, 
@@ -207,8 +229,16 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
         if(any(classcts == 0)) {
           zeroclass <- (1:nclust)[classcts == 0]
           
-          ## Move one row per empty class
-          mvs <- sapply(zeroclass, function(x) which.min(lossmat[x, ]))
+          ## Move worst fitting observation(s) to the empty cluster(s)
+          ## Order from worst to best-fitting
+          ord <- order(losscomps, decreasing = TRUE)
+          
+          ## Remove objects from classes smaller than or equal to minsize from consideration
+          smallclasses <- which(classcts <= minsize)
+          ord <- setdiff(ord, which(class %in% smallclasses))
+          
+          ## Move worst-fitting observation(s) in consideration set
+          mvs <- ord[seq_along(zeroclass)]
           class[mvs] <- zeroclass
           
           ## Update loss components and recalculate counts
@@ -216,7 +246,7 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
           classcts <- table(factor(class, levels = 1:nclust))
           
           ## Give message about cluster
-          message("Note: an empty cluster was re-initialized.\n")
+          message("int.lsbclust: ", length(zeroclass), " empty cluster(s) re-initialized.")
             
           ## If an empty class still exists, fill in with random choices
           if(any(classcts == 0)) {
@@ -224,14 +254,16 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
             mvs <- sample.int(n = N, size = length(zeroclass), replace = FALSE)
             class[mvs] <- zeroclass
             losscomps[mvs] <- lossmat[cbind(zeroclass, mvs)]
-            message("Note: an empty cluster was randomly re-initialized.\n")
+            message("int.lsbclust: an empty cluster was randomly re-initialized.")
           } 
         }
-        return(class)
+        return(list(class = class, losscomps = losscomps))
       }
     
     ## Update classification if empty classes and calculate loss
-    newclass <- checkempty(class = newclass)
+    emptyChecked <- checkempty(class = newclass)
+    newclass <- emptyChecked$class
+    losscomps <- emptyChecked$losscomps
     loss <- sum(losscomps)
 
     return(list(newclass = newclass, loss = loss, losscomps = losscomps))
@@ -245,7 +277,7 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
     
     ## Terminate start if one or more classes are empty    
     if(any(table(factor(start, levels = 1:nclust)) == 0)) {
-      message("A random start was discarded due to empty clusters.\n")
+      message("int.lsbclust: Random start discarded due to empty clusters.\n")
       return(list(minloss = NA))
     }
     
@@ -300,14 +332,19 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
   }
 
   ## Apply algorithm over all starts, possibly in parallel
-  if (parallelize) {
+  if (parallel) {
     if (.Platform$OS.type == "windows") {
-      cl <- makeCluster(detectCores())
-      res <- parLapply(cl = cl, X = starts, fun = onestart)
-      stopCluster(cl)
+      cl <- makeCluster(mc.cores, type = "PSOCK")
+      registerDoParallel(cl)
+      # res <- parLapply(cl = cl, X = starts, fun = onestart)
+      # stopCluster(cl)
     } else {
-      res <- mclapply(X = starts, FUN = onestart, mc.cores = detectCores(), mc.allow.recursive = FALSE)
+      cl <- makeCluster(mc.cores, type = "FORK")
+      registerDoParallel(cl)
+      # res <- mclapply(X = starts, FUN = onestart, mc.cores = mc.cores, mc.allow.recursive = FALSE)
     }
+    res <- foreach(i = seq_along(starts)) %dopar% onestart(start = starts[[i]])
+    stopCluster(cl)
   } else {
     res <- lapply(starts, onestart)
   }
@@ -486,7 +523,8 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
   bestres$allloss <- allloss
   bestres$alpha <- alpha
   bestres$df <- df
-  bestres$data <- data.org
+  if (return_data) 
+    bestres$data <- data.org
   bestres$delta <- delta
   bestres$fixed <- fixed
   bestres$rfit <- rfit
@@ -499,6 +537,7 @@ int.lsbclust <- function(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("
   bestres$losscomps <- bestres$losscomps/maxloss
   bestres$nclust <- nclust
   bestres$N <- N
+  bestres$perm <- perm
   bestres$call <- cll
   bestres$time <- proc.time()[3] - time0
 #   bestres$means <- lapply(bestres$means, 'dimnames<-', list(rownames(data), colnames(data)))

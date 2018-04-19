@@ -20,4 +20,3 @@ A numeric matrix with \code{nclust} rows and \code{J*K} columns.
 This function calculates the cluster means in vectorized form based on the current
 value of the clustering vector.
 }
-

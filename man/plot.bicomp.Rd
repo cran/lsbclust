@@ -28,4 +28,3 @@ via \code{\link{grid.arrange}} or not.}
 \description{
 Plot method for an object of class \code{bicomp} (see \code{\link{bicomp}}).
 }
-

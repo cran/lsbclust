@@ -15,4 +15,3 @@ A numeric matrix with \code{nclust} rows and \code{N} columns.
 This function calculates the loss function for the interaction clustering
 for all data slices and clusters means. The inputs are numeric matrices.
 }
-

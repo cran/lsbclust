@@ -25,4 +25,3 @@ plot(m)
 Pieter C. Schoonees
 }
 \keyword{hplot}
-

@@ -28,12 +28,11 @@ data("dcars")
 m <- lsbclust(data = dcars, margin = 3, delta = c(1, 1, 1, 1), nclust = 5, nstart = 1)
 plot(m)
 }
-\author{
-Pieter C. Schoonees
-}
 \seealso{
 \code{\link{plot.int.lsbclust}}, \code{\link{plot.ovl.kmeans}}, 
 \code{\link{plot.row.kmeans}}, \code{\link{plot.col.kmeans}}
 }
+\author{
+Pieter C. Schoonees
+}
 \keyword{hplot}
-

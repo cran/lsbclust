@@ -12,4 +12,3 @@ cmat(k)
 \description{
 A utility function for calculating centring matrices.
 }
-

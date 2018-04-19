@@ -31,4 +31,3 @@ Plot 'step.lsbclust' objects.
 Pieter C. Schoonees
 }
 \keyword{hplot}
-
