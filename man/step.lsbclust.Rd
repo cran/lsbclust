@@ -4,10 +4,10 @@
 \alias{step.lsbclust}
 \title{Model Search for lsbclust}
 \usage{
-step.lsbclust(data, margin = 3L, delta = c(1, 1, 1, 1), nclust, ndim = 2,
-  fixed = c("none", "rows", "columns"), nstart = 20, starts = NULL,
-  nstart.kmeans = 500, alpha = 0.5, parallel = FALSE, maxit = 100,
-  verbose = -1, type = NULL, ...)
+step.lsbclust(data, margin = 3L, delta = c(1, 1, 1, 1), nclust,
+  ndim = 2, fixed = c("none", "rows", "columns"), nstart = 20,
+  starts = NULL, nstart.kmeans = 500, alpha = 0.5,
+  parallel = FALSE, maxit = 100, verbose = -1, type = NULL, ...)
 }
 \arguments{
 \item{data}{A three-way array representing the data.}

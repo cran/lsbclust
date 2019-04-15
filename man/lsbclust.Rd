@@ -4,10 +4,11 @@
 \alias{lsbclust}
 \title{Least-squares Bilinear Clustering of Three-way Data}
 \usage{
-lsbclust(data, margin = 3L, delta = c(1L, 1L, 1L, 1L), nclust, ndim = 2L,
-  fixed = c("none", "rows", "columns"), nstart = 20L, starts = NULL,
-  nstart.kmeans = 500L, alpha = 0.5, parallel = FALSE, maxit = 100L,
-  verbose = 1, method = "diag", type = NULL, sep.nclust = TRUE, ...)
+lsbclust(data, margin = 3L, delta = c(1L, 1L, 1L, 1L), nclust,
+  ndim = 2L, fixed = c("none", "rows", "columns"), nstart = 20L,
+  starts = NULL, nstart.kmeans = 500L, alpha = 0.5,
+  parallel = FALSE, maxit = 100L, verbose = 1, method = "diag",
+  type = NULL, sep.nclust = TRUE, ...)
 }
 \arguments{
 \item{data}{A three-way array representing the data.}

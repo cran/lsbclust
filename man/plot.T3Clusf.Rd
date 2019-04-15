@@ -4,7 +4,8 @@
 \alias{plot.T3Clusf}
 \title{Plot Method for Class 'T3Clusf'}
 \usage{
-\method{plot}{T3Clusf}(x, which = seq_len(nclust), arrange = FALSE, ...)
+\method{plot}{T3Clusf}(x, which = seq_len(nclust), arrange = FALSE,
+  ...)
 }
 \arguments{
 \item{x}{An object of class \code{T3Clusf}.}

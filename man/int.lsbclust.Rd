@@ -4,10 +4,11 @@
 \alias{int.lsbclust}
 \title{Interaction Clustering in Least Squares Bilinear Clustering}
 \usage{
-int.lsbclust(data, margin = 3L, delta, nclust, ndim = 2, fixed = c("none",
-  "rows", "columns"), nstart = 50, starts = NULL, alpha = 0.5,
-  parallel = FALSE, mc.cores = detectCores() - 1, maxit = 100,
-  verbose = 1, method = "diag", minsize = 3L, return_data = FALSE)
+int.lsbclust(data, margin = 3L, delta, nclust, ndim = 2,
+  fixed = c("none", "rows", "columns"), nstart = 50, starts = NULL,
+  alpha = 0.5, parallel = FALSE, mc.cores = detectCores() - 1,
+  maxit = 100, verbose = 1, method = "diag", minsize = 3L,
+  return_data = FALSE)
 }
 \arguments{
 \item{data}{A three-way array representing the data.}

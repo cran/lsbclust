@@ -4,7 +4,6 @@
 \alias{KMeansW}
 \alias{ComputeMeans}
 \alias{AssignCluster}
-\alias{KMeansW}
 \title{C++ Function for Weighted K-Means}
 \usage{
 ComputeMeans(cm, data, weight, nclust)

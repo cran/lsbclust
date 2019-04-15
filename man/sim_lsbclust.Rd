@@ -4,12 +4,12 @@
 \alias{sim_lsbclust}
 \title{Simulate and Analyze LSBCLUST}
 \usage{
-sim_lsbclust(ndata, nobs, size, nclust, clustsize = NULL, delta = rep(1L,
-  4L), ndim = 2L, alpha = 0.5, fixed = c("none", "rows", "columns"),
-  err_sd = 1, svmins = 0.5, svmax = 5, seed = NULL, parallel = FALSE,
-  parallel_data = TRUE, verbose = 0, nstart_T3 = 20L, nstart_ak = 20L,
-  mc.cores = detectCores() - 1, include_fits = FALSE,
-  include_data = FALSE, nstart, nstart.kmeans)
+sim_lsbclust(ndata, nobs, size, nclust, clustsize = NULL,
+  delta = rep(1L, 4L), ndim = 2L, alpha = 0.5, fixed = c("none",
+  "rows", "columns"), err_sd = 1, svmins = 0.5, svmax = 5,
+  seed = NULL, parallel = FALSE, parallel_data = TRUE, verbose = 0,
+  nstart_T3 = 20L, nstart_ak = 20L, mc.cores = detectCores() - 1,
+  include_fits = FALSE, include_data = FALSE, nstart, nstart.kmeans)
 }
 \arguments{
 \item{ndata}{Integer giving the number of data sets to generate with the same underlying

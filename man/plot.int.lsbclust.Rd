@@ -6,17 +6,18 @@
 \usage{
 \method{plot}{int.lsbclust}(x, which = seq_len(nclust),
   plot.type = c("biplots", "means", "estimates"), segments = NULL,
-  biplot.axes = TRUE, nmarkers = 5, alpha = NULL, check.alpha = TRUE,
-  fix.alpha = FALSE, probs = 0, arrange = FALSE, fix.limits = TRUE,
-  limit.exp = 1.05, lambda.scale = TRUE, procrustes.rotation = x$fixed ==
-  "none", fix.lambda = FALSE, labs.grey = TRUE, label.0 = FALSE,
-  tick.length = 0.0075 * diff(lims), axis.col = "grey60", label.size = 3,
-  axis.size = 0.25, axis.title.size = 4, draw.axis = NULL,
-  points.col = list(rows = "red", columns = "blue2"),
+  biplot.axes = TRUE, nmarkers = 5, alpha = NULL,
+  check.alpha = TRUE, fix.alpha = FALSE, probs = 0,
+  arrange = FALSE, fix.limits = TRUE, limit.exp = 1.05,
+  lambda.scale = TRUE, procrustes.rotation = x$fixed == "none",
+  fix.lambda = FALSE, labs.grey = TRUE, label.0 = FALSE,
+  tick.length = 0.0075 * diff(lims), axis.col = "grey60",
+  label.size = 3, axis.size = 0.25, axis.title.size = 4,
+  draw.axis = NULL, points.col = list(rows = "red", columns = "blue2"),
   offset.tick.labels = 3.5, offset.axis.title = list(rows = 0.015 *
   max(nchar(rnms)), columns = 0.015 * max(nchar(cnms))),
-  axis.arrow = grid::arrow(angle = 20, length = grid::unit(0.0175, "npc")),
-  ...)
+  axis.arrow = grid::arrow(angle = 20, length = grid::unit(0.0175,
+  "npc")), ...)
 }
 \arguments{
 \item{x}{An object of class \code{int.lsbclust}.}
@@ -40,13 +41,16 @@ for all axes, or a named list. This is passed as the argument \code{n} to \code{
 
 \item{alpha}{Numeric value in [0, 1] which determines how the singular values are distributed
 between rows and columns. It will trigger a recomputation of the updates if it does not correspond
-to the value used when fitting the model.}
+to the value used when fitting the model. Do not confuse this with the term "alpha" used in the
+context of colour transparency.}
 
 \item{check.alpha}{Logical indicating whether to look for a better alpha. This is only used when
-\code{alpha = NULL} is used.}
+\code{alpha = NULL} is used. Do not confuse this with the term "alpha" used in the
+context of colour transparency.}
 
 \item{fix.alpha}{Logical indicating whether to fix alpha across all clusters or not 
-when \code{fixed == "none"}.}
+when \code{fixed == "none"}. Do not confuse this with the term "alpha" used in the
+context of colour transparency.}
 
 \item{probs}{Argument passed to \code{\link{quantile}} to determine the alpha value. The 
 corresponding quantile of the distances of all points in the biplots to the origin will be
@@ -120,5 +124,9 @@ In case \code{nmarkers} is a list, it can have up to two elements. These are req
 \code{"rows"} and/or \code{"columns"}, otherwise an error will be thrown. The elements of the list
 contains either single numeric values each or numeric vectors of the appropriate lengths
 indicating the \code{n} argument passed to \code{\link{pretty}}.
+
+In some cases, the row and/or column fit values can contain non-finite values. If that occurs,
+colour transparency cannot and will not be used for that particular element (and this can vary between clusters). 
+This relates to the  alpha parameter in the plotting routines.
 }
 \keyword{hplot}

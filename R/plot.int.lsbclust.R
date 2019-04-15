@@ -19,11 +19,14 @@
 # @param axes.col The colour used for the biplot axes.
 #' @param alpha Numeric value in [0, 1] which determines how the singular values are distributed
 #' between rows and columns. It will trigger a recomputation of the updates if it does not correspond
-#' to the value used when fitting the model.
+#' to the value used when fitting the model. Do not confuse this with the term "alpha" used in the
+#' context of colour transparency.
 #' @param check.alpha Logical indicating whether to look for a better alpha. This is only used when
-#' \code{alpha = NULL} is used.
+#' \code{alpha = NULL} is used. Do not confuse this with the term "alpha" used in the
+#' context of colour transparency.
 #' @param fix.alpha Logical indicating whether to fix alpha across all clusters or not 
-#' when \code{fixed == "none"}.
+#' when \code{fixed == "none"}. Do not confuse this with the term "alpha" used in the
+#' context of colour transparency.
 #' @param probs Argument passed to \code{\link{quantile}} to determine the alpha value. The 
 #' corresponding quantile of the distances of all points in the biplots to the origin will be
 #' used to determine alpha in case check.alpha = TRUE.
@@ -76,6 +79,10 @@
 #' \code{"rows"} and/or \code{"columns"}, otherwise an error will be thrown. The elements of the list
 #' contains either single numeric values each or numeric vectors of the appropriate lengths
 #' indicating the \code{n} argument passed to \code{\link{pretty}}.
+#' 
+#' In some cases, the row and/or column fit values can contain non-finite values. If that occurs,
+#' colour transparency cannot and will not be used for that particular element (and this can vary between clusters). 
+#' This relates to the  alpha parameter in the plotting routines.
 #' @keywords hplot
 #' @method plot int.lsbclust
 #' @export
@@ -431,7 +438,7 @@ plot.int.lsbclust <- function(x, which = seq_len(nclust), plot.type = c("biplots
     dfC <- as.data.frame(do.call(rbind, x$C), row.names = "")
     colnames(dfC) <- c("x", "y")
     dfC$Cluster <- rep(1:max(nC, nD), each = J)
-    dfC$Fit <- c(x$rfit)
+    dfC$Fit <- if (all(is.finite(x$rfit))) c(x$rfit) else 1
     dfC$Label <- rep(rnms, nclust)
     
     #   ## Add grey-scale colours for text
@@ -442,7 +449,7 @@ plot.int.lsbclust <- function(x, which = seq_len(nclust), plot.type = c("biplots
     dfD <- as.data.frame(do.call(rbind, x$D), row.names = "")
     colnames(dfD) <- c("x", "y")
     dfD$Cluster <- rep(1:max(nC, nD), each = K)
-    dfD$Fit <- c(x$cfit)
+    dfD$Fit <- if (all(is.finite(x$cfit))) c(x$cfit) else 1
     dfD$Label <- rep(cnms, nclust)
     
     #   ## Add grey-scale colours for text
@@ -591,8 +598,11 @@ plot.int.lsbclust <- function(x, which = seq_len(nclust), plot.type = c("biplots
         ## Coordinates for axis labels
         xtitle <- (lens + offset.axis.title$rows) * cos(angles)
         ytitle <- (lens + offset.axis.title$rows) * sin(angles)
-        if (labs.grey) dfTitle <- data.frame(x = xtitle, y = ytitle, Fit = dfC.cur$Fit, Label = rnms)
-        else dfTitle <- data.frame(x = xtitle, y = ytitle, Fit = 1, Label = rnms)
+        if (labs.grey) {
+          dfTitle <- data.frame(x = xtitle, y = ytitle, Fit = dfC.cur$Fit, Label = rnms)
+        } else {
+          dfTitle <- data.frame(x = xtitle, y = ytitle, Fit = 1, Label = rnms)
+        }
         
         plots[[i]] <- plots[[i]] + 
           geom_segment(aes(xend = x, yend = y, x = 0, y = 0, alpha = Fit), 
@@ -608,8 +618,11 @@ plot.int.lsbclust <- function(x, which = seq_len(nclust), plot.type = c("biplots
         ytitle <- (lens + offset.axis.title$columns) * sin(angles)
         
         ## Add fit for alpha mapping if (labs.grey)
-        if (labs.grey) dfTitle <- data.frame(x = xtitle, y = ytitle, Fit = dfD.cur$Fit, Label = cnms)
-        else dfTitle <- data.frame(x = xtitle, y = ytitle, Fit = 1, Label = cnms)
+        if (labs.grey) {
+          dfTitle <- data.frame(x = xtitle, y = ytitle, Fit = dfD.cur$Fit, Label = cnms)
+        } else {
+          dfTitle <- data.frame(x = xtitle, y = ytitle, Fit = 1, Label = cnms)
+        }
         
         plots[[i]] <- plots[[i]] +
           geom_segment(data = dfD.cur, aes(xend = x, yend = y, x = 0, y = 0, alpha = Fit),  
@@ -625,10 +638,18 @@ plot.int.lsbclust <- function(x, which = seq_len(nclust), plot.type = c("biplots
           geom_text(mapping = aes(alpha = Fit, label = Label), vjust = 1.75, size = 4)
       }
       if (!segments[2]) {
-        plots[[i]] <- plots[[i]] +
-          geom_point(data = dfD.cur, mapping = aes(alpha = Fit, fill = Fill), size = 4, shape = 21) + 
-          scale_fill_manual(values = points.col$columns, guide = FALSE) + 
-          geom_text(data = dfD.cur, mapping = aes(alpha = Fit, label = Label), vjust = -0.75, size = 4)
+        ## TODO: This is not symmetric in C and D
+        if (labs.grey) {
+          plots[[i]] <- plots[[i]] +
+            geom_point(data = dfD.cur, mapping = aes(alpha = Fit, fill = Fill), size = 4, shape = 21) + 
+            scale_fill_manual(values = points.col$columns, guide = FALSE) + 
+            geom_text(data = dfD.cur, mapping = aes(alpha = Fit, label = Label), vjust = -0.75, size = 4)
+        } else {
+          plots[[i]] <- plots[[i]] +
+            geom_point(data = dfD.cur, mapping = aes(alpha = Fit, fill = Fill), size = 4, shape = 21) + 
+            scale_fill_manual(values = points.col$columns, guide = FALSE) + 
+            geom_text(data = dfD.cur, mapping = aes(label = Label), vjust = -0.75, size = 4)
+        }
       }
       
       ## Set theme elements, and add title

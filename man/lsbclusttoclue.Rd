@@ -4,8 +4,6 @@
 \alias{cl_class_ids.int.lsbclust}
 \alias{is.cl_partition.int.lsbclust}
 \alias{is.cl_hard_partition.int.lsbclust}
-\alias{is.cl_partition.int.lsbclust}
-\alias{is.cl_hard_partition.int.lsbclust}
 \alias{cl_class_ids.lsbclust_sim_part}
 \alias{is.cl_partition.lsbclust_sim_part}
 \alias{is.cl_hard_partition.lsbclust_sim_part}

@@ -4,8 +4,9 @@
 \alias{plot.bicomp}
 \title{Plot a \code{bicomp} Object}
 \usage{
-\method{plot}{bicomp}(x, which = 0L:4L, arrange = TRUE, col = c("red4",
-  "beige", "blue4"), strip.legend = TRUE, add.titles = FALSE, ...)
+\method{plot}{bicomp}(x, which = 0L:4L, arrange = TRUE,
+  col = c("red4", "beige", "blue4"), strip.legend = TRUE,
+  add.titles = FALSE, ...)
 }
 \arguments{
 \item{x}{An object of class \code{bicomp}.}

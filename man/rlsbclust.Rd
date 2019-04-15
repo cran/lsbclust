@@ -5,8 +5,8 @@
 \title{Simulate from LSBCLUST Model}
 \usage{
 rlsbclust(ndata = 50L, nobs, size, nclust, clustsize = NULL,
-  delta = rep(1L, 4L), ndim = 2L, alpha = 0.5, fixed = c("none", "rows",
-  "columns"), err_sd = 1, svmins = 1, svmax = 6)
+  delta = rep(1L, 4L), ndim = 2L, alpha = 0.5, fixed = c("none",
+  "rows", "columns"), err_sd = 1, svmins = 1, svmax = 6)
 }
 \arguments{
 \item{ndata}{Integer giving the number of data sets to generate with the same underlying
